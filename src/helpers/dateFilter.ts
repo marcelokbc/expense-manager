@@ -2,7 +2,8 @@ import { Item } from '../types/Item';
 
 export const getCurrentMonth = () => {
     let now = new Date();
-    return `${now.getFullYear()}-${now.getMonth() + 1}`;
+    let month = (now.getMonth() + 1).toString().padStart(2, '0');
+    return `${now.getFullYear()}-${month}`;
 }
 
 export const filterListByMonth = (list: Item[], date: string): Item[] => {

@@ -1,4 +1,4 @@
-import * as C from './styles';
+import { TableRow, TableCell, Box, Typography } from '@mui/material';
 import { Item } from '../../types/Item';
 import { formatDate } from '../../helpers/dateFilter';
 import { categories } from '../../data/categories';
@@ -8,20 +8,49 @@ type Props = {
 }
 
 export const TableItem = ({ item }: Props) => {
+    const rowColor = categories[item.category].expense ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 255, 0, 0.1)';
+    
     return (
-        <C.TableLine>
-            <C.TableColumn>{formatDate(item.date)}</C.TableColumn>
-            <C.TableColumn>
-                <C.Category color={categories[item.category].color}>
+        <TableRow sx={{ backgroundColor: rowColor }}>
+            <TableCell>{formatDate(item.date)}</TableCell>
+            <TableCell>
+                <Box 
+                    sx={{ 
+                        display: 'inline-block',
+                        padding: '5px 10px',
+                        borderRadius: '5px',
+                        backgroundColor: categories[item.category].color,
+                        color: 'white',
+                    }}
+                >
                     {categories[item.category].title}
-                </C.Category>   
-            </C.TableColumn>
-            <C.TableColumn>{item.title}</C.TableColumn>
-            <C.TableColumn>
-                <C.Value color={categories[item.category].expense ? 'red' : 'green'}>
-                    R$ {item.value}
-                </C.Value>
-            </C.TableColumn>
-        </C.TableLine>
+                </Box>
+            </TableCell>
+            <TableCell>{item.title}</TableCell>
+            <TableCell>
+                <Typography 
+                    sx={{ 
+                        color: categories[item.category].expense ? 'red' : 'green',
+                        fontWeight: 'bold'
+                    }}
+                >
+                    R$ {item.value.toFixed(2)}
+                </Typography>
+            </TableCell>
+        </TableRow>
     );
 }
+        //  <C.TableLine>
+        //      <C.TableColumn>{formatDate(item.date)}</C.TableColumn>
+        //      <C.TableColumn>
+        //          <C.Category color={categories[item.category].color}>
+        //              {categories[item.category].title}
+        //          </C.Category>   
+        //      </C.TableColumn>
+        //      <C.TableColumn>{item.title}</C.TableColumn>
+        //      <C.TableColumn>
+        //          <C.Value color={categories[item.category].expense ? 'red' : 'green'}>
+        //              R$ {item.value}
+        //          </C.Value>
+        //      </C.TableColumn>
+        //  </C.TableLine>

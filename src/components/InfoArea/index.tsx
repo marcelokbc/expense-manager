@@ -1,4 +1,6 @@
-import * as C from './styles';
+import { Box, Typography, IconButton, Paper } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import { formatCurrentMonth } from '../../helpers/dateFilter';
 import { ResumeItem } from '../../components/ResumeItem';
 
@@ -26,21 +28,23 @@ export const InfoArea = ({ currentMonth, onMonthChange, income, expense }: Props
     };
 
     return (
-        <C.Container>
-            <C.MonthArea>
-                <C.MonthArrow onClick={handlePrevMonth}>⬅️</C.MonthArrow>
-                <C.MonthTitle>{formatCurrentMonth(currentMonth)}</C.MonthTitle>
-                <C.MonthArrow onClick={handleNextMonth}>➡️</C.MonthArrow>
-            </C.MonthArea>
-            <C.ResumeArea>
+        <Paper sx={{ padding: 2, marginBottom: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 2 }}>
+                <IconButton onClick={handlePrevMonth} sx={{ marginRight: 1 }}>
+                    <ArrowBackIosIcon />
+                </IconButton>
+                <Typography variant="h6">
+                    {formatCurrentMonth(currentMonth)}
+                </Typography>
+                <IconButton onClick={handleNextMonth} sx={{ marginLeft: 1 }}>
+                    <ArrowForwardIosIcon />
+                </IconButton>
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
                 <ResumeItem title="Receitas" value={income} />
                 <ResumeItem title="Despesas" value={expense} />
-                <ResumeItem 
-                    title="Balanço" 
-                    value={income - expense}
-                    color={(income - expense) < 0 ? 'red' : 'green'}
-                />
-            </C.ResumeArea>
-        </C.Container>
+                <ResumeItem title="Balanço" value={income - expense} color={(income - expense) < 0 ? 'red' : 'green'} />
+            </Box>
+        </Paper>
     );
 };

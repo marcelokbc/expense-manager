@@ -1,4 +1,4 @@
-import * as C from './styles';
+import { Table, TableHead, TableRow, TableCell, TableBody, Paper } from '@mui/material';
 import { Item } from '../../types/Item';
 import { TableItem } from '../TableItem'
 
@@ -8,20 +8,22 @@ type Props = {
 
 export const TableArea = ({ list }: Props) => {
     return (
-        <C.Table>
-            <thead>
-                <tr>
-                    <C.TableHeadColumn width={100}>Data</C.TableHeadColumn>
-                    <C.TableHeadColumn width={130}>Categoria</C.TableHeadColumn>
-                    <C.TableHeadColumn>Título</C.TableHeadColumn>
-                    <C.TableHeadColumn width={150}>Valor</C.TableHeadColumn>
-                </tr>
-            </thead>
-            <tbody>
-                {list.map((item, index) => (
-                    <TableItem key={index} item={item} />
-                ))}
-            </tbody>
-        </C.Table>
+        <Paper elevation={3} sx={{ marginTop: 2, padding: 2 }}>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={100} >Data</TableCell>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Categoria</TableCell>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} >Título</TableCell>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Valor</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {list.map((item, index) => (
+                        <TableItem key={index} item={item} />
+                    ))}
+                </TableBody>
+            </Table>
+        </Paper>
     );
 }

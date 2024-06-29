@@ -18,6 +18,7 @@ const App = () => {
   const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
+  const [defaultDate, setDefaultDate] = useState('');
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -66,9 +67,10 @@ const App = () => {
             onMonthChange={handleMonthChange}
             income={income}
             expense={expense}
+            setDefaultDate={setDefaultDate}
           />
 
-          <InputArea onAdd={handleAddItem} />
+          <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
 
           <TableArea list={filteredList} />
         </Paper>

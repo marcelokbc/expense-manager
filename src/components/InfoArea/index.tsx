@@ -9,15 +9,17 @@ type Props = {
     onMonthChange: (newMonth: string) => void;
     income: number;
     expense: number;
+    setDefaultDate: (date: string) => void;
 };
 
-export const InfoArea = ({ currentMonth, onMonthChange, income, expense }: Props) => {
+export const InfoArea = ({ currentMonth, onMonthChange, income, expense, setDefaultDate }: Props) => {
     
     const handlePrevMonth = () => {
         let [year, month] = currentMonth.split('-');
         let currentDate = new Date(parseInt(year), parseInt(month) - 1, 1);
         currentDate.setMonth( currentDate.getMonth() - 1 );
         onMonthChange(`${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`);
+        setDefaultDate(currentDate.toISOString().split('T')[0]); 
     };
 
     const handleNextMonth = () => {
@@ -25,6 +27,7 @@ export const InfoArea = ({ currentMonth, onMonthChange, income, expense }: Props
         let currentDate = new Date(parseInt(year), parseInt(month) - 1, 1);
         currentDate.setMonth( currentDate.getMonth() + 1 );
         onMonthChange(`${currentDate.getFullYear()}-${currentDate.getMonth() + 1}`);
+        setDefaultDate(currentDate.toISOString().split('T')[0]);
     };
 
     return (

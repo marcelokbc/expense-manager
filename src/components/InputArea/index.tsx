@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { TextField, Box, IconButton, MenuItem, InputLabel, FormControl, Select, Paper, Typography } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { TextField, Box, IconButton, MenuItem, InputLabel, FormControl, Select, Paper, Typography, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add'; 
 import { Item } from '../../types/Item';
 
@@ -8,13 +8,18 @@ import { categories } from '../../data/categories';
 
 type Props = {
     onAdd: (item: Item) => void;
+    defaultDate: string;
 }
 
-export const InputArea = ({ onAdd }: Props) => {
-    const [dateField, setDateField] = useState('');
+export const InputArea = ({ onAdd, defaultDate }: Props) => {
+    const [dateField, setDateField] = useState(defaultDate);
     const [categoryField, setCategoryField] = useState('');
     const [titleField, setTitleField] = useState('');
     const [valueField, setValueField] = useState(0);
+
+    useEffect(() => {
+        setDateField(defaultDate);
+    }, [defaultDate]);
 
     let categoryKeys: string[] = Object.keys(categories);
     
@@ -47,7 +52,7 @@ export const InputArea = ({ onAdd }: Props) => {
     }
 
     const clearFields = () => {
-        setDateField('');
+        setDateField(defaultDate);
         setCategoryField('');
         setTitleField('');
         setValueField(0);
@@ -102,75 +107,16 @@ export const InputArea = ({ onAdd }: Props) => {
                 fullWidth
                 sx={{ maxWidth: '150px' }} // Increase the size as desired
             />
-            <IconButton
-                color="primary"
-                onClick={handleAddEvent}
-                sx={{ flexShrink: 0 }}
-            >
-                <AddIcon />
-            </IconButton>
+            <Tooltip title="Nova Transação">
+                <IconButton
+                    color="primary"
+                    onClick={handleAddEvent}
+                    sx={{ flexShrink: 0 }}
+                >
+                    <AddIcon />
+                </IconButton>
+            </Tooltip>
         </Box>
         </Paper>
     );
-            // <Grid container spacing={2}>
-            //     <Grid item xs={2}>
-            //         <TextField
-            //             label="Data"
-            //             type="date"
-            //             variant="outlined"
-            //             fullWidth
-            //             InputLabelProps={{ shrink: true }}
-            //             value={dateField}
-            //             onChange={e => setDateField(e.target.value)}
-            //         />
-            //     </Grid>
-            //     <Grid item xs={2}>
-            //         <TextField
-            //             label="Categoria"
-            //             select
-            //             variant="outlined"
-            //             fullWidth
-            //             value={categoryField}
-            //             onChange={e => setCategoryField(e.target.value)}
-            //         >
-            //             <MenuItem value="">
-            //                 <em>Selecione</em>
-            //             </MenuItem>
-            //             {categoryKeys.map((key, index) => (
-            //                 <MenuItem key={index} value={key}>
-            //                     {categories[key].title}
-            //                 </MenuItem>
-            //             ))}
-            //         </TextField>
-            //     </Grid>
-            //     <Grid item xs={4}>
-            //         <TextField
-            //             label="Título"
-            //             variant="outlined"
-            //             fullWidth
-            //             value={titleField}
-            //             onChange={e => setTitleField(e.target.value)}
-            //         />
-            //     </Grid>
-            //     <Grid item xs={1}>
-            //         <TextField
-            //             label="Valor"
-            //             type="number"
-            //             variant="outlined"
-            //             fullWidth
-            //             value={valueField}
-            //             onChange={e => setValueField(parseFloat(e.target.value))}
-            //         />
-            //     </Grid>
-            //     <Grid item xs={3}>
-            //         <Button
-            //             variant="contained"
-            //             color="primary"
-            //             onClick={handleAddEvent}
-            //             fullWidth
-            //         >
-            //             Adicionar
-            //         </Button>
-            //     </Grid>
-            // </Grid>
 }

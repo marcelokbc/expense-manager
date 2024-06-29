@@ -1,4 +1,4 @@
-import * as C from './styles';
+import { Box, Typography, Paper } from '@mui/material';
 
 type Props = {
     title: string;
@@ -8,9 +8,17 @@ type Props = {
 
 export const ResumeItem = ({title, value, color}: Props) => {
     return (
-        <C.Container>
-            <C.Title>{title}</C.Title>
-            <C.Info color={color}>R$ {value.toFixed(2)}</C.Info>
-        </C.Container>
+        <Paper elevation={3} sx={{ flex: 1, margin: 1, padding: 2 }}>
+            <Box sx={{ textAlign: 'center', marginBottom: 1 }}>
+                <Typography variant="subtitle1" color="textSecondary" sx={{ fontWeight: 'bold' }}>
+                    {title}
+                </Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: color ?? 'black' }}>
+                    R$ {value.toFixed(2)}
+                </Typography>
+            </Box>
+        </Paper>
     );
 }

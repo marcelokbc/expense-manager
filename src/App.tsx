@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import * as C from './App.styles';
+import Container from '@mui/material/Container';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
+import { CssBaseline, Box, Paper } from '@mui/material';
 import { Item } from './types/Item';
 import { items } from './data/items';
 import { categories } from './data/categories';
@@ -14,6 +18,7 @@ const App = () => {
   const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
+  const [defaultDate, setDefaultDate] = useState('');
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -46,25 +51,33 @@ const App = () => {
   }
 
   return (
-    <C.Container>
-      <C.Header>
-        <C.HeaderText>Gerenciamento Financeiro Pessoal</C.HeaderText>
-      </C.Header>
-      <C.Body>
-        
-        <InfoArea 
-          currentMonth={currentMonth} 
-          onMonthChange={handleMonthChange}
-          income={income}
-          expense={expense}
-        />
+    <Container maxWidth="lg" sx={{ marginBottom: '50px' }}> 
+      <CssBaseline />
+      <AppBar position="static" sx={{ backgroundColor: 'darkblue', height: '120px', textAlign: 'center' }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Typography variant="h4" color="white" sx={{ marginTop: '40px', fontWeight: 'bold' }}>
+            Gerenciador Financeiro
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Box mt={2} sx={{ margin: 'auto', maxWidth: '1280px' }}>
+        <Paper elevation={3} sx={{ padding: 3 }}>
+          <InfoArea 
+            currentMonth={currentMonth}
+            onMonthChange={handleMonthChange}
+            income={income}
+            expense={expense}
+            setDefaultDate={setDefaultDate}
+          />
 
-        <InputArea onAdd={handleAddItem} />
+          <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
 
-        <TableArea list={filteredList} />
-      </C.Body>
-    </C.Container>
+          <TableArea list={filteredList} />
+        </Paper>
+      </Box>
+    </Container>
   );
 }
+      
 
 export default App;

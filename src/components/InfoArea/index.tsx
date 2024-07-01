@@ -44,8 +44,8 @@ export const InfoArea = ({ currentMonth, onMonthChange, income, expense, setDefa
                 </IconButton>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
-                <ResumeItem title="Receitas" value={income} />
-                <ResumeItem title="Despesas" value={expense} />
+                <ResumeItem title="Receitas" value={income} color="blue" />
+                <ResumeItem title="Despesas" value={expense} color="red" />
                 <ResumeItem title="Balanço" value={income - expense} color={(income - expense) < 0 ? 'red' : 'green'} />
             </Box>
         </Paper>

@@ -12,13 +12,33 @@ import { TableArea } from './components/TableArea';
 import { InfoArea } from './components/InfoArea';
 import { InputArea } from './components/InputArea';
 
+const LOCAL_STORAGE_KEYS = 'transactions';
+
 const App = () => {
-  const [list, setList] = useState(items);
+  const [list, setList] = useState<Item[]>(() => {
+    const savedTransactions = localStorage.getItem(LOCAL_STORAGE_KEYS);
+    if (savedTransactions) {
+      const parsedTransactions: Item[] = JSON.parse(savedTransactions);
+      // Convert date fields to Date objects
+      return [...items, ...parsedTransactions.map(item => ({
+        ...item,
+        date: new Date(item.date)
+      }))];
+    } else {
+      return items;
+    }
+  });
   const [filteredList, setFilteredList] = useState<Item[]>([]);
   const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
   const [defaultDate, setDefaultDate] = useState('');
+  
+  useEffect(() => {
+    // Update local storage whenever list changes
+    const savedTransactions = list.slice(items.length); // Exclude the initial items
+    localStorage.setItem(LOCAL_STORAGE_KEYS, JSON.stringify(savedTransactions));
+  }, [list]);
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -79,5 +99,4 @@ const App = () => {
   );
 }
       
-
 export default App;

@@ -11,6 +11,7 @@ import { getCurrentMonth, filterListByMonth } from './helpers/dateFilter';
 import { TableArea } from './components/TableArea';
 import { InfoArea } from './components/InfoArea';
 import { InputArea } from './components/InputArea';
+import {  SavingsInvestimentArea } from './components/SavingsInvestmentArea';
 
 const LOCAL_STORAGE_KEYS = 'transactions';
 
@@ -91,6 +92,8 @@ const App = () => {
           />
 
           <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
+
+          <SavingsInvestimentArea income={income} />
 
           <TableArea list={filteredList} />
         </Paper>

@@ -6,11 +6,11 @@ import TableInvestiment from '../TableInvestment';
 
 type Investment = {
     type: string;
-    percentage: number;
+    amount: number;
     investmentDate: string;
     redemptionDate: string;
     forecastAmount: number;
-    percentageYield: number;
+    percentageYield: string;
 }
 
 type Props = {
@@ -29,9 +29,9 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
     useEffect(() => {
         let expError = '';
         let invError = '';
-        const totalInvestimentPercentage = investments.reduce((acc, item) => acc + item.percentage, 0);
+        const totalInvestmentAmount = investments.reduce((acc, item) => acc + item.amount, 0);
 
-        if (expensePercentage + totalInvestimentPercentage > 100) {
+        if (expensePercentage + (totalInvestmentAmount / income * 100) > 100) {
             expError = 'A soma de despesas e investimentos não deve ser maior que 100%';
             invError = 'A soma de despesas e investimentos não deve ser maior que 100%';
         }
@@ -39,12 +39,6 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
         if (expensePercentage < 0 || expensePercentage > 100) {
             expError = 'O percentual de despesas deve estar entre 0 e 100';
         }
-
-        investments.forEach(inv => {
-            if (inv.percentage < 0 || inv.percentage > 100) {
-                invError = 'Os percentuais de investimentos devem estar entre 0 e 100';
-            }
-        });
 
         setExpenseError(expError);
         setInvestmentError(invError);
@@ -64,7 +58,7 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
                 text: investmentError,
             });
         }
-    }, [expenseError, expensePercentage, investmentError, investments]);
+    }, [expenseError, expensePercentage, income, investmentError, investments]);
 
     const handleInvestmentChange = (index: number, field: string, value: any) => {
         const newInvestments = investments.map((inv, i) =>
@@ -74,7 +68,7 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
     };
 
     const handleAddInvestment = () => {
-        setInvestments([...investments, { type: '', percentage: 0, investmentDate: '', redemptionDate: '', forecastAmount: 0, percentageYield: 0 }]);
+        setInvestments([...investments, { type: '', amount: 0, investmentDate: '', redemptionDate: '', forecastAmount: 0, percentageYield: '' }]);
     };
 
     const handleRemoveInvestment = (index: number) => {
@@ -83,7 +77,7 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
     };
 
     const expensesAllocation = income * (expensePercentage / 100);
-    const totalInvestmentAllocation = investments.reduce((acc, inv) => acc + income * (inv.percentage / 100), 0);
+    const totalInvestmentAmount = investments.reduce((acc, inv) => acc + inv.amount, 0);
 
     return (
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
@@ -118,12 +112,11 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
                                 sx={{ marginRight: 2 }}
                             />
                             <TextField
-                                label="Percentual"
+                                label="Valor Investido"
                                 type="number"
-                                value={investment.percentage}
-                                onChange={(e) => handleInvestmentChange(index, 'percentage', parseInt(e.target.value))}
-                                InputProps={{ inputProps: { min: 0, max: 100 } }}
-                                sx={{ width: '10%', marginRight: 2 }}
+                                value={investment.amount}
+                                onChange={(e) => handleInvestmentChange(index, 'amount', parseInt(e.target.value))}
+                                sx={{ width: '15%', marginRight: 2 }}
                             />
                             <TextField
                                 label="Data do Investimento"
@@ -145,7 +138,6 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
                                     shrink: true,
                                 }}
                             />
-                        
                             <TextField
                                 label="Valor Previsto"
                                 type="number"
@@ -154,10 +146,10 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
                                 sx={{ width: '15%', marginRight: 2 }}
                             />
                             <TextField
-                                label="Rendimento Percentual"
-                                type="number"
+                                label="Rendimento (%)"
                                 value={investment.percentageYield}
-                                onChange={(e) => handleInvestmentChange(index, 'percentageYield', parseInt(e.target.value))}
+                                variant="outlined"
+                                onChange={(e) => handleInvestmentChange(index, 'percentageYield', e.target.value)}
                                 sx={{ width: '15%', marginRight: 2 }}
                             />
                             <IconButton onClick={() => handleRemoveInvestment(index)}>
@@ -171,7 +163,7 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
             <Box sx={{ textAlign: 'center', marginTop: 3 }}>
                 <Typography variant="subtitle1">Total de Investimentos</Typography>
                 <Typography variant="h6" color="green">
-                    {totalInvestmentAllocation >= 0 ? `R$ ${totalInvestmentAllocation.toFixed(2)}` : 'N/A'}
+                    {totalInvestmentAmount >= 0 ? `R$ ${totalInvestmentAmount.toFixed(2)}` : 'N/A'}
                 </Typography>
             </Box>
             <Box sx={{ marginTop: 3 }}>

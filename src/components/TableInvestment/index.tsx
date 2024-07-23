@@ -4,11 +4,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 
 type Investment = {
     type: string;
-    percentage: number;
+    amount: number;
     investmentDate: string;
     redemptionDate: string;
     forecastAmount: number;
-    percentageYield: number;
+    percentageYield: string;
 }
 
 type InvestmentTableProps = {
@@ -23,11 +23,11 @@ const TableInvestment: React.FC<InvestmentTableProps> = ({ investments, handleRe
                 <TableHead>
                     <TableRow>
                         <TableCell>Tipo de Investimento</TableCell>
-                        <TableCell>Percentual</TableCell>
+                        <TableCell>Valor do Investimento</TableCell>
                         <TableCell>Data do Investimento</TableCell>
                         <TableCell>Data de Resgate</TableCell>
                         <TableCell>Valor Previsto</TableCell>
-                        <TableCell>Rendimento Percentual</TableCell>
+                        <TableCell>Rendimento (%)</TableCell>
                         <TableCell>Ações</TableCell>
                     </TableRow>
                 </TableHead>
@@ -35,11 +35,11 @@ const TableInvestment: React.FC<InvestmentTableProps> = ({ investments, handleRe
                     {investments.map((investment, index) => (
                         <TableRow key={index}>
                             <TableCell>{investment.type}</TableCell>
-                            <TableCell>{investment.percentage}%</TableCell>
+                            <TableCell>R$ {investment.amount.toFixed(2)}</TableCell>
                             <TableCell>{investment.investmentDate}</TableCell>
                             <TableCell>{investment.redemptionDate}</TableCell>
                             <TableCell>R$ {investment.forecastAmount.toFixed(2)}</TableCell>
-                            <TableCell>{investment.percentageYield}%</TableCell>
+                            <TableCell>{investment.percentageYield}</TableCell>
                             <TableCell>
                                 <IconButton onClick={() => handleRemoveInvestment(index)}>
                                     <DeleteIcon />

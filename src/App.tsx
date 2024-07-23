@@ -34,6 +34,7 @@ const App = () => {
   const [income, setIncome] = useState(0);
   const [expense, setExpense] = useState(0);
   const [defaultDate, setDefaultDate] = useState('');
+  const [expensePercentage, setExpensePercentage] = useState(70);
   
   useEffect(() => {
     // Update local storage whenever list changes
@@ -93,7 +94,11 @@ const App = () => {
 
           <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
 
-          <SavingsInvestimentArea income={income} />
+          <SavingsInvestimentArea 
+            income={income} 
+            expensePercentage={expensePercentage}
+            setExpensePercentage={setExpensePercentage}
+          />
 
           <TableArea list={filteredList} />
         </Paper>

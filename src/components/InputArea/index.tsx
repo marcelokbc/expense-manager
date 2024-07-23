@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { TextField, Box, IconButton, MenuItem, InputLabel, FormControl, Select, Paper, Typography, Tooltip } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add'; 
 import { Item } from '../../types/Item';
+import Swal from 'sweetalert2';
 
 import { newDateAdjusted } from '../../helpers/dateFilter';
 import { categories } from '../../data/categories';
@@ -39,7 +40,11 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
             errors.push('Valor inválido!');
         }
         if(errors.length > 0) {
-            alert(errors.join("\n"));
+            Swal.fire({
+                icon: 'error',
+                title: 'Erro ao adicionar transação',
+                html: errors.map(error => `<p>${error}</p>`).join('')
+            });
         } else {
             onAdd({
                 date: newDateAdjusted(dateField),

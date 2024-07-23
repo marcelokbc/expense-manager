@@ -81,7 +81,7 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
 
     return (
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold' }}>
+            <Typography variant="h6" gutterBottom sx={{ textAlign: 'center', fontWeight: 'bold', marginBottom: 4 }}>
                 Área de Investimento e Poupança
             </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>

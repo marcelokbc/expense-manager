@@ -5,6 +5,7 @@ import { Item } from '../../types/Item';
 import Swal from 'sweetalert2';
 
 import { newDateAdjusted } from '../../helpers/dateFilter';
+import { creditCards, getNextMonthCharge } from '../../helpers/paymentMethod';
 import { categories } from '../../data/categories';
 
 type Props = {
@@ -17,6 +18,7 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
     const [categoryField, setCategoryField] = useState('');
     const [titleField, setTitleField] = useState('');
     const [valueField, setValueField] = useState(0);
+    const [paymentMethodField, setPaymentMethodField] = useState('');
 
     useEffect(() => {
         setDateField(defaultDate);
@@ -39,6 +41,9 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
         if(valueField <= 0) {
             errors.push('Valor inválido!');
         }
+        if(!paymentMethodField) {
+            errors.push('Método de pagamento inválido!');
+        }
         if(errors.length > 0) {
             Swal.fire({
                 icon: 'error',
@@ -46,21 +51,41 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
                 html: errors.map(error => `<p>${error}</p>`).join('')
             });
         } else {
+            const selectedCreditCard = creditCards.find(card => card.name === paymentMethodField);
+
+            let adjustedDate = new Date(dateField);
+
+            if (selectedCreditCard) {
+                adjustedDate = getNextMonthCharge(new Date(dateField), selectedCreditCard);
+                
+                console.log("Original Date: ", dateField);
+                console.log("Adjusted Date: ", adjustedDate);
+                
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Atenção!',
+                        html: `Essa compra no cartão <strong>${selectedCreditCard.name}</strong> será cobrada no mês <strong>${adjustedDate.toLocaleDateString()}</strong>.`
+                    });
+            }
+
             onAdd({
-                date: newDateAdjusted(dateField),
+                date: newDateAdjusted(adjustedDate.toISOString().split('T')[0]),
                 category: categoryField,
                 title: titleField,
-                value: valueField
+                value: valueField,
+                paymentMethod: paymentMethodField
             });
+
             clearFields();
         }
     }
 
     const clearFields = () => {
-        setDateField(defaultDate);
         setCategoryField('');
         setTitleField('');
         setValueField(0);
+        setPaymentMethodField('');
+        setDateField(new Date().toISOString().split('T')[0]);
     }
 
     return (
@@ -90,7 +115,7 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
                     <MenuItem value="">
                         <em>Nenhuma</em>
                     </MenuItem>
-                    {categoryKeys.map((key, index) => (
+                    {categoryKeys.map((key: string, index: number) => (
                         <MenuItem key={index} value={key}>{categories[key].title}</MenuItem>
                     ))}
                 </Select>
@@ -111,7 +136,28 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
                 onChange={e => setValueField(parseFloat(e.target.value))}
                 fullWidth
                 sx={{ maxWidth: '150px' }} // Increase the size as desired
-            />
+                />
+                <FormControl fullWidth>
+                    <InputLabel>Método de Pagamento</InputLabel>
+                    <Select
+                        value={paymentMethodField}
+                        onChange={e => setPaymentMethodField(e.target.value)}
+                        variant="outlined"
+                        fullWidth
+                        label="Método de Pagamento"
+                    >
+                        <MenuItem value="">
+                            <em>Nenhum</em>
+                        </MenuItem>
+                        <MenuItem value="Nubank Ju">Nubank Ju</MenuItem>
+                        <MenuItem value="Nubank Kbça">Nubank Kbça</MenuItem>
+                        <MenuItem value="Carrefour">Carrefour </MenuItem>
+                        <MenuItem value="Assai">Assai </MenuItem>
+                        <MenuItem value="debito">Débito</MenuItem>
+                        <MenuItem value="dinheiro">Dinheiro</MenuItem>
+                        <MenuItem value="pix">Pix</MenuItem>
+                    </Select>
+                </FormControl>
             <Tooltip title="Nova Transação">
                 <IconButton
                     color="primary"

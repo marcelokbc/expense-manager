@@ -27,6 +27,7 @@ export const TableItem = ({ item }: Props) => {
                 </Box>
             </TableCell>
             <TableCell>{item.title}</TableCell>
+            <TableCell>{item.paymentMethod}</TableCell>
             <TableCell>
                 <Typography 
                     sx={{ 

@@ -11,7 +11,9 @@ import { getCurrentMonth, filterListByMonth } from './helpers/dateFilter';
 import { TableArea } from './components/TableArea';
 import { InfoArea } from './components/InfoArea';
 import { InputArea } from './components/InputArea';
-import {  SavingsInvestimentArea } from './components/SavingsInvestmentArea';
+import { SavingsInvestimentArea } from './components/SavingsInvestmentArea';
+import { ExpenseChart } from './components/ExpenseChart';
+import './App.css';
 
 const LOCAL_STORAGE_KEYS = 'transactions';
 
@@ -35,6 +37,7 @@ const App = () => {
   const [expense, setExpense] = useState(0);
   const [defaultDate, setDefaultDate] = useState('');
   const [expensePercentage, setExpensePercentage] = useState(70);
+  const [categoryExpenses, setCategoryExpenses] = useState<{ [category: string]: number }>({});
   
   useEffect(() => {
     // Update local storage whenever list changes
@@ -49,17 +52,27 @@ const App = () => {
   useEffect(()=>{
     let incomeCount = 0;
     let expenseCount = 0;
+    let categoryTotals: { [category: string]: number } = {};
 
-    for(let i in filteredList) {
-      if(categories[filteredList[i].category].expense) {
-        expenseCount += filteredList[i].value;
-      } else {
-        incomeCount += filteredList[i].value;
+    for (let i in filteredList) {
+    const item = filteredList[i];
+    const categoryName = categories[item.category].title;
+    
+    if (categories[item.category].expense) {
+      expenseCount += item.value;
+      
+      if (!categoryTotals[categoryName]) {
+        categoryTotals[categoryName] = 0;
       }
+      categoryTotals[categoryName] += item.value;
+    } else {
+      incomeCount += item.value;
     }
+  }
 
     setIncome(incomeCount);
     setExpense(expenseCount);
+    setCategoryExpenses(categoryTotals);
   }, [filteredList]);
 
   const handleMonthChange = (newMonth: string) => {
@@ -91,6 +104,8 @@ const App = () => {
             expense={expense}
             setDefaultDate={setDefaultDate}
           />
+
+          <ExpenseChart expensesData={categoryExpenses} />
 
           <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
 

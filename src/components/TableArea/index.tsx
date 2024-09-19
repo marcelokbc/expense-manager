@@ -13,7 +13,7 @@ export const TableArea = ({ list }: Props) => {
                 <TableHead>
                     <TableRow>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={100} >Data</TableCell>
-                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Categoria</TableCell>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={190}>Categoria</TableCell>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} >Título</TableCell>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} >Método de Pagamento</TableCell>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Valor</TableCell>

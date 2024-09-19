@@ -20,7 +20,7 @@ export const TableItem = ({ item }: Props) => {
                         padding: '5px 10px',
                         borderRadius: '5px',
                         backgroundColor: categories[item.category].color,
-                        color: 'dark',
+                        color: 'white',
                     }}
                 >
                     {categories[item.category].title}

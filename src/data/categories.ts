@@ -24,4 +24,6 @@ export const categories: Category = {
     gifts: { title: 'Presentes', color: 'blue', expense: true },
     personal_care: { title: 'Cuidados Pessoais', color: 'blue', expense: true },
     school_material: { title: 'Material Escolar', color: 'blue', expense: true },
+    reform: { title: 'Reforma', color: 'blue', expense: true },
+    home: { title: 'Casa', color: 'blue', expense: true },
 }

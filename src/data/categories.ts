@@ -23,4 +23,5 @@ export const categories: Category = {
     clotes: { title: 'Vestuário', color: 'blue', expense: true },
     gifts: { title: 'Presentes', color: 'blue', expense: true },
     personal_care: { title: 'Cuidados Pessoais', color: 'blue', expense: true },
+    school_material: { title: 'Material Escolar', color: 'blue', expense: true },
 }

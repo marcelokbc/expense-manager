@@ -9,7 +9,7 @@ export const categories: Category = {
     pets: { title: 'Pets', color: 'blue', expense: true },
     pharmacy: { title: 'Farmácia', color: 'blue', expense: true },
     car: { title: 'Carro', color: 'blue', expense: true },
-    school: { title: 'Escola', color: 'blue', expense: true },
+    education: { title: 'Educação', color: 'blue', expense: true },
     internet: { title: 'Claro', color: 'blue', expense: true },
     card: { title: 'Cartão Nubank Ju', color: 'purple', expense: true },
     card1: { title: 'Cartão Carrefour', color: 'purple', expense: true },

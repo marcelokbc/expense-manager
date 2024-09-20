@@ -26,4 +26,5 @@ export const categories: Category = {
     school_material: { title: 'Material Escolar', color: 'blue', expense: true },
     reform: { title: 'Reforma', color: 'blue', expense: true },
     home: { title: 'Casa', color: 'blue', expense: true },
+    entertainment: { title: 'Entretenimento', color: 'blue', expense: true },
 }

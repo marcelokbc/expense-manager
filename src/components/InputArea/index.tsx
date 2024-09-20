@@ -24,7 +24,11 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
         setDateField(defaultDate);
     }, [defaultDate]);
 
-    let categoryKeys: string[] = Object.keys(categories);
+    let categoryKeys: string[] = Object.keys(categories).sort((a, b) => {
+        if (categories[a].title < categories[b].title) return -1;
+        if (categories[a].title > categories[b].title) return 1;
+        return 0;
+    });
     
     const handleAddEvent = () => {
         let errors: string[] = [];

@@ -40,8 +40,7 @@ const App = () => {
   const [categoryExpenses, setCategoryExpenses] = useState<{ [category: string]: number }>({});
   
   useEffect(() => {
-    // Update local storage whenever list changes
-    const savedTransactions = list.slice(items.length); // Exclude the initial items
+    const savedTransactions = list.slice(items.length); 
     localStorage.setItem(LOCAL_STORAGE_KEYS, JSON.stringify(savedTransactions));
   }, [list]);
 
@@ -85,6 +84,12 @@ const App = () => {
     setList(newList);
   }
 
+  const handleRemoveItem = (index: number) => {
+    const updatedList = [...list];
+    updatedList.splice(index, 1);
+    setList(updatedList);
+  }
+
   return (
     <Container maxWidth="lg" sx={{ marginBottom: '50px' }}> 
       <CssBaseline />
@@ -115,7 +120,10 @@ const App = () => {
             setExpensePercentage={setExpensePercentage}
           />
 
-          <TableArea list={filteredList} />
+          <TableArea
+            list={filteredList}
+            handleRemoveItem={handleRemoveItem}
+          />
         </Paper>
       </Box>
     </Container>

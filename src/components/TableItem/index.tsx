@@ -1,15 +1,18 @@
-import { TableRow, TableCell, Box, Typography } from '@mui/material';
+import { TableRow, TableCell, Box, Typography, IconButton } from '@mui/material';
 import { Item } from '../../types/Item';
 import { formatDate } from '../../helpers/dateFilter';
 import { categories } from '../../data/categories';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 type Props = {
     item: Item
+    index: number
+    handleRemoveItem: (index: number) => void
 }
 
-export const TableItem = ({ item }: Props) => {
+export const TableItem = ({ item, index, handleRemoveItem  }: Props) => {
     const rowColor = categories[item.category].expense ? 'rgba(255, 0, 0, 0.1)' : 'rgba(0, 255, 0, 0.1)';
-    
+
     return (
         <TableRow sx={{ backgroundColor: rowColor }}>
             <TableCell>{formatDate(item.date)}</TableCell>
@@ -37,6 +40,11 @@ export const TableItem = ({ item }: Props) => {
                 >
                     R$ {item.value.toFixed(2)}
                 </Typography>
+            </TableCell>
+            <TableCell>
+                <IconButton onClick={() => handleRemoveItem(index)}>
+                    <DeleteIcon />
+                </IconButton>
             </TableCell>
         </TableRow>
     );

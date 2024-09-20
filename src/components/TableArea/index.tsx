@@ -4,9 +4,10 @@ import { TableItem } from '../TableItem'
 
 type Props = {
     list: Item[]
+    handleRemoveItem: (index: number) => void
 }
 
-export const TableArea = ({ list }: Props) => {
+export const TableArea = ({ list, handleRemoveItem}: Props) => {
     return (
         <Paper elevation={3} sx={{ marginTop: 2, padding: 2 }}>
             <Table>
@@ -17,11 +18,17 @@ export const TableArea = ({ list }: Props) => {
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} >Título</TableCell>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} >Método de Pagamento</TableCell>
                         <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Valor</TableCell>
+                        <TableCell sx={{ backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }} width={130}>Ações</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {list.map((item, index) => (
-                        <TableItem key={index} item={item} />
+                        <TableItem
+                            key={index}
+                            item={item}
+                            index={index}
+                            handleRemoveItem={handleRemoveItem}
+                        />
                     ))}
                 </TableBody>
             </Table>

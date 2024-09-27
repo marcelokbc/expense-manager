@@ -27,4 +27,5 @@ export const categories: Category = {
     reform: { title: 'Reforma', color: 'blue', expense: true },
     home: { title: 'Casa', color: 'blue', expense: true },
     entertainment: { title: 'Entretenimento', color: 'blue', expense: true },
+    advocacy: { title: 'Advocacia', color: 'blue', expense: true },
 }

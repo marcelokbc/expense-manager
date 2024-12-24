@@ -5,6 +5,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { CssBaseline, Box, Paper } from '@mui/material';
 import { Item } from './types/Item';
+import { Investment } from './types/Investment';
 import { items } from './data/items';
 import { categories } from './data/categories';
 import { getCurrentMonth, filterListByMonth } from './helpers/dateFilter';
@@ -16,21 +17,31 @@ import { ExpenseChart } from './components/ExpenseChart';
 import './App.css';
 
 const LOCAL_STORAGE_KEYS = 'transactions';
+const LOCAL_STORAGE_INVESTMENTS_KEYS = 'investments';
 
 const App = () => {
   const [list, setList] = useState<Item[]>(() => {
     const savedTransactions = localStorage.getItem(LOCAL_STORAGE_KEYS);
-    if (savedTransactions) {
-      const parsedTransactions: Item[] = JSON.parse(savedTransactions);
-      // Convert date fields to Date objects
-      return [...items, ...parsedTransactions.map(item => ({
-        ...item,
-        date: new Date(item.date)
-      }))];
+      if (savedTransactions) {
+        const parsedTransactions: Item[] = JSON.parse(savedTransactions);
+        return [...items, ...parsedTransactions.map(item => ({
+          ...item,
+          date: new Date(item.date)
+        }))];
+      } else {
+        return items;
+      }
+  });
+
+  const [investments, setInvestments] = useState<Investment[]>(() => {
+    const savedInvestments = localStorage.getItem(LOCAL_STORAGE_INVESTMENTS_KEYS);
+    if (savedInvestments) {
+      return JSON.parse(savedInvestments);
     } else {
-      return items;
+      return [];
     }
   });
+
   const [filteredList, setFilteredList] = useState<Item[]>([]);
   const [currentMonth, setCurrentMonth] = useState(getCurrentMonth());
   const [income, setIncome] = useState(0);
@@ -40,10 +51,13 @@ const App = () => {
   const [categoryExpenses, setCategoryExpenses] = useState<{ [category: string]: number }>({});
   
   useEffect(() => {
-    // Update local storage whenever list changes
     const savedTransactions = list.slice(items.length); // Exclude the initial items
     localStorage.setItem(LOCAL_STORAGE_KEYS, JSON.stringify(savedTransactions));
   }, [list]);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_INVESTMENTS_KEYS, JSON.stringify(investments));
+  }, [investments]);
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -113,6 +127,8 @@ const App = () => {
             income={income} 
             expensePercentage={expensePercentage}
             setExpensePercentage={setExpensePercentage}
+            investments={investments}
+            setInvestments={setInvestments}
           />
 
           <TableArea list={filteredList} />

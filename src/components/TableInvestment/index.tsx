@@ -1,15 +1,9 @@
 import React from 'react';
+import { Investment } from '../../types/Investment';
+import { formatDate } from '../../helpers/dateFilter';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-type Investment = {
-    type: string;
-    amount: number;
-    investmentDate: string;
-    redemptionDate: string;
-    forecastAmount: number;
-    percentageYield: string;
-}
 
 type InvestmentTableProps = {
     investments: Investment[];
@@ -36,8 +30,8 @@ const TableInvestment: React.FC<InvestmentTableProps> = ({ investments, handleRe
                         <TableRow key={index}>
                             <TableCell>{investment.type}</TableCell>
                             <TableCell>R$ {investment.amount.toFixed(2)}</TableCell>
-                            <TableCell>{investment.investmentDate}</TableCell>
-                            <TableCell>{investment.redemptionDate}</TableCell>
+                            <TableCell>{formatDate(new Date(investment.investmentDate))}</TableCell>
+                            <TableCell>{formatDate(new Date(investment.redemptionDate))}</TableCell>
                             <TableCell>R$ {investment.forecastAmount.toFixed(2)}</TableCell>
                             <TableCell>{investment.percentageYield}</TableCell>
                             <TableCell>

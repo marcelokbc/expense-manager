@@ -1,37 +1,50 @@
 import { useState, useEffect } from 'react';
+import { Investment } from '../../types/Investment';
+import TableInvestiment from '../TableInvestment';
 import { Box, Typography, Paper, TextField, Button, IconButton } from '@mui/material';
 import Swal from 'sweetalert2';
 import DeleteIcon from '@mui/icons-material/Delete';
-import TableInvestiment from '../TableInvestment';
 
-type Investment = {
-    type: string;
-    amount: number;
-    investmentDate: string;
-    redemptionDate: string;
-    forecastAmount: number;
-    percentageYield: string;
-}
 
 type Props = {
     income: number;
     expensePercentage: number;
     setExpensePercentage: (value: number) => void;
+    investments: Investment[];
+    setInvestments: React.Dispatch<React.SetStateAction<Investment[]>>;
 };
 
-export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpensePercentage, setExpensePercentage}: Props) => {
+export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpensePercentage, setExpensePercentage, investments, setInvestments }: Props) => {
     
     const [expensePercentage, setExpensePercentageState] = useState(initialExpensePercentage);
-    const [investments, setInvestments] = useState<Investment[]>([]);
     const [expenseError, setExpenseError] = useState('');
     const [investmentError, setInvestmentError] = useState('');
+
+    const handleInvestmentChange = (index: number, field: string, value: any) => {
+        const newInvestments = investments.map((inv, i) =>
+            i === index ? { ...inv, [field]: value } : inv
+        );
+        setInvestments(newInvestments);
+    };
+
+    const handleAddInvestment = () => {
+        setInvestments([...investments, { type: '', amount: 0, investmentDate: '', redemptionDate: '', forecastAmount: 0, percentageYield: '' }]);
+    };
+
+    const handleRemoveInvestment = (index: number) => {
+        const newInvestments = investments.filter((_, i) => i !== index);
+        setInvestments(newInvestments);
+    };
+
+    const expensesAllocation = income * (expensePercentage / 100);
+    const totalInvestmentAmount = investments.reduce((acc, inv) => acc + inv.amount, 0);
 
     useEffect(() => {
         let expError = '';
         let invError = '';
         const totalInvestmentAmount = investments.reduce((acc, item) => acc + item.amount, 0);
 
-        if (expensePercentage + (totalInvestmentAmount / income * 100) > 100) {
+        if (expensePercentage + (totalInvestmentAmount / income ) * 100 > 100) {
             expError = 'A soma de despesas e investimentos não deve ser maior que 100%';
             invError = 'A soma de despesas e investimentos não deve ser maior que 100%';
         }
@@ -59,25 +72,6 @@ export const SavingsInvestimentArea = ({ income, expensePercentage: initialExpen
             });
         }
     }, [expenseError, expensePercentage, income, investmentError, investments]);
-
-    const handleInvestmentChange = (index: number, field: string, value: any) => {
-        const newInvestments = investments.map((inv, i) =>
-            i === index ? { ...inv, [field]: value } : inv
-        );
-        setInvestments(newInvestments);
-    };
-
-    const handleAddInvestment = () => {
-        setInvestments([...investments, { type: '', amount: 0, investmentDate: '', redemptionDate: '', forecastAmount: 0, percentageYield: '' }]);
-    };
-
-    const handleRemoveInvestment = (index: number) => {
-        const newInvestments = investments.filter((_, i) => i !== index);
-        setInvestments(newInvestments);
-    };
-
-    const expensesAllocation = income * (expensePercentage / 100);
-    const totalInvestmentAmount = investments.reduce((acc, inv) => acc + inv.amount, 0);
 
     return (
         <Paper elevation={3} sx={{ padding: 2, marginTop: 3 }}>

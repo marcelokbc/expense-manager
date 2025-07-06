@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { CssBaseline, Box, Paper, Tabs, Tab } from '@mui/material';
 import { Item } from './types/Item';
 import { Bolo } from './types/Bolo';
+import { Investment } from './types/Investment';
 import { items } from './data/items';
 import { categories } from './data/categories';
 import { getCurrentMonth, filterListByMonth } from './helpers/dateFilter';
@@ -22,19 +23,28 @@ import './App.css';
 
 const LOCAL_STORAGE_KEYS = 'transactions';
 const LOCAL_STORAGE_BOLOS = 'bolos';
+const LOCAL_STORAGE_INVESTMENTS_KEYS = 'investments';
 
 const App = () => {
   const [list, setList] = useState<Item[]>(() => {
     const savedTransactions = localStorage.getItem(LOCAL_STORAGE_KEYS);
-    if (savedTransactions) {
-      const parsedTransactions: Item[] = JSON.parse(savedTransactions);
-      // Convert date fields to Date objects
-      return [...items, ...parsedTransactions.map(item => ({
-        ...item,
-        date: new Date(item.date)
-      }))];
+      if (savedTransactions) {
+        const parsedTransactions: Item[] = JSON.parse(savedTransactions);
+        return [...items, ...parsedTransactions.map(item => ({
+          ...item,
+          date: new Date(item.date)
+        }))];
+      } else {
+        return items;
+      }
+  });
+
+  const [investments, setInvestments] = useState<Investment[]>(() => {
+    const savedInvestments = localStorage.getItem(LOCAL_STORAGE_INVESTMENTS_KEYS);
+    if (savedInvestments) {
+      return JSON.parse(savedInvestments);
     } else {
-      return items;
+      return [];
     }
   });
 
@@ -63,7 +73,6 @@ const App = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
-    // Update local storage whenever list changes
     const savedTransactions = list.slice(items.length); // Exclude the initial items
     localStorage.setItem(LOCAL_STORAGE_KEYS, JSON.stringify(savedTransactions));
   }, [list]);
@@ -72,6 +81,8 @@ const App = () => {
     // Update local storage whenever bolos changes
     localStorage.setItem(LOCAL_STORAGE_BOLOS, JSON.stringify(bolos));
   }, [bolos]);
+    localStorage.setItem(LOCAL_STORAGE_INVESTMENTS_KEYS, JSON.stringify(investments));
+  }, [investments]);
 
   useEffect(()=>{
     setFilteredList( filterListByMonth(list, currentMonth) );
@@ -154,6 +165,13 @@ const App = () => {
               <ExpenseChart expensesData={categoryExpenses} />
 
               <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
+          <SavingsInvestimentArea 
+            income={income} 
+            expensePercentage={expensePercentage}
+            setExpensePercentage={setExpensePercentage}
+            investments={investments}
+            setInvestments={setInvestments}
+          />
 
               <SavingsInvestimentArea
                 income={income}

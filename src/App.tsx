@@ -81,6 +81,8 @@ const App = () => {
     // Update local storage whenever bolos changes
     localStorage.setItem(LOCAL_STORAGE_BOLOS, JSON.stringify(bolos));
   }, [bolos]);
+
+  useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_INVESTMENTS_KEYS, JSON.stringify(investments));
   }, [investments]);
 
@@ -165,18 +167,13 @@ const App = () => {
               <ExpenseChart expensesData={categoryExpenses} />
 
               <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
-          <SavingsInvestimentArea 
-            income={income} 
-            expensePercentage={expensePercentage}
-            setExpensePercentage={setExpensePercentage}
-            investments={investments}
-            setInvestments={setInvestments}
-          />
 
               <SavingsInvestimentArea
                 income={income}
                 expensePercentage={expensePercentage}
                 setExpensePercentage={setExpensePercentage}
+                investments={investments}
+                setInvestments={setInvestments}
               />
 
               <TableArea list={filteredList} />

@@ -127,10 +127,16 @@ const App = () => {
     setList(newList);
   }
 
-  const handleAddBolo = (bolos: Bolo[]) => {
-    let newBolos = [...bolos];
-    newBolos.push(...bolos);
-    setBolos(newBolos);
+  const handleAddBolo = (newBolos: Bolo[]) => {
+    setBolos(prevBolos => [...prevBolos, ...newBolos]);
+  }
+
+  const handleUpdateBolo = (id: string, updatedBolo: Bolo) => {
+    setBolos(prevBolos =>
+      prevBolos.map(bolo =>
+        bolo.id === id ? updatedBolo : bolo
+      )
+    );
   }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -186,7 +192,7 @@ const App = () => {
 
               <BoloInputArea onAdd={handleAddBolo} defaultDate={defaultDate} />
 
-              <BoloTableArea list={filteredBolos} />
+              <BoloTableArea list={filteredBolos} onUpdateBolo={handleUpdateBolo} />
             </>
           )}
         </Paper>

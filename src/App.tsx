@@ -6,7 +6,6 @@ import Typography from '@mui/material/Typography';
 import { CssBaseline, Box, Paper, Tabs, Tab } from '@mui/material';
 import { Item } from './types/Item';
 import { Bolo } from './types/Bolo';
-import { Investment } from './types/Investment';
 import { items } from './data/items';
 import { categories } from './data/categories';
 import { getCurrentMonth, filterListByMonth } from './helpers/dateFilter';
@@ -39,13 +38,12 @@ const App = () => {
       }
   });
 
-  const [investments, setInvestments] = useState<Investment[]>(() => {
+  const [investments, setInvestments] = useState<any[]>(() => {
     const savedInvestments = localStorage.getItem(LOCAL_STORAGE_INVESTMENTS_KEYS);
     if (savedInvestments) {
       return JSON.parse(savedInvestments);
-    } else {
-      return [];
     }
+    return [];
   });
 
   const [bolos, setBolos] = useState<Bolo[]>(() => {
@@ -81,6 +79,8 @@ const App = () => {
     // Update local storage whenever bolos changes
     localStorage.setItem(LOCAL_STORAGE_BOLOS, JSON.stringify(bolos));
   }, [bolos]);
+
+  useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_INVESTMENTS_KEYS, JSON.stringify(investments));
   }, [investments]);
 
@@ -165,19 +165,13 @@ const App = () => {
               <ExpenseChart expensesData={categoryExpenses} />
 
               <InputArea onAdd={handleAddItem} defaultDate={defaultDate} />
-          <SavingsInvestimentArea 
-            income={income} 
+          <SavingsInvestimentArea
+            income={income}
             expensePercentage={expensePercentage}
             setExpensePercentage={setExpensePercentage}
             investments={investments}
             setInvestments={setInvestments}
           />
-
-              <SavingsInvestimentArea
-                income={income}
-                expensePercentage={expensePercentage}
-                setExpensePercentage={setExpensePercentage}
-              />
 
               <TableArea list={filteredList} />
             </>

@@ -10,5 +10,6 @@ export const flavors = [
     'Moranguete',
     'Ovomaltine',
     'Oreo',
+    'Chocolate Branco',
     'Outros'
 ];

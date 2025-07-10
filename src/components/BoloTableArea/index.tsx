@@ -40,11 +40,14 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
         bolo: Bolo | null;
         paid: boolean;
         paymentMethod: PaymentMethod;
+        editMode: 'group' | 'individual';
+        selectedBoloId?: string;
     }>({
         open: false,
         bolo: null,
         paid: false,
-        paymentMethod: 'cash'
+        paymentMethod: 'cash',
+        editMode: 'group'
     });
 
     const formatCurrency = (value: number) => {
@@ -62,35 +65,70 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
         return paid ? 'success' : 'warning';
     };
 
-    const getStatusText = (paid: boolean) => {
-        return paid ? 'Pago' : 'Pendente';
+    const getStatusText = (paid: boolean, paidQuantity?: number, totalQuantity?: number) => {
+        if (paid) {
+            return 'Pago';
+        }
+        if (paidQuantity !== undefined && totalQuantity !== undefined && totalQuantity > 1) {
+            return `Pendente (${paidQuantity}/${totalQuantity} pagos)`;
+        }
+        return 'Pendente';
     };
 
     const handleEditClick = (bolo: Bolo) => {
+        // Encontra o grupo do bolo
+        const groupKey = `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}`;
+        const group = groupedBolos.find(g => g.key === groupKey);
+
+        // Se o grupo tem múltiplos bolos, inicializa com o primeiro bolo
+        const initialBolo = group && group.originalBolos.length > 1 ? group.originalBolos[0] : bolo;
+
         setEditDialog({
             open: true,
-            bolo: bolo,
-            paid: bolo.paid,
+            bolo: initialBolo,
+            paid: initialBolo.paid,
             paymentMethod: Object.keys(paymentMethods).find(key =>
-                paymentMethods[key as PaymentMethod] === bolo.paymentMethod
-            ) as PaymentMethod || 'cash'
+                paymentMethods[key as PaymentMethod] === initialBolo.paymentMethod
+            ) as PaymentMethod || 'cash',
+            editMode: group && group.originalBolos.length > 1 ? 'group' : 'individual',
+            selectedBoloId: initialBolo.id
         });
     };
 
     const handleSaveEdit = () => {
         if (editDialog.bolo && onUpdateBolo) {
-            const updatedBolo = {
-                ...editDialog.bolo,
-                paid: editDialog.paid,
-                paymentMethod: paymentMethods[editDialog.paymentMethod]
-            };
-            onUpdateBolo(editDialog.bolo.id, updatedBolo);
-            setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash' });
+            if (editDialog.editMode === 'individual' && editDialog.selectedBoloId) {
+                // Edita apenas o bolo selecionado
+                const updatedBolo = {
+                    ...editDialog.bolo,
+                    paid: editDialog.paid,
+                    paymentMethod: paymentMethods[editDialog.paymentMethod]
+                };
+                onUpdateBolo(editDialog.selectedBoloId, updatedBolo);
+            } else {
+                // Edita todo o grupo
+                const groupKey = `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}`;
+                const group = groupedBolos.find(g => g.key === groupKey);
+
+                if (group) {
+                    // Atualiza todos os bolos do grupo com o mesmo status e forma de pagamento
+                    group.originalBolos.forEach(bolo => {
+                        const updatedBolo = {
+                            ...bolo,
+                            paid: editDialog.paid,
+                            paymentMethod: paymentMethods[editDialog.paymentMethod]
+                        };
+                        onUpdateBolo(bolo.id, updatedBolo);
+                    });
+                }
+            }
+
+            setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group' });
         }
     };
 
     const handleCancelEdit = () => {
-        setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash' });
+        setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group' });
     };
 
     const groupedBolos = useMemo(() => {
@@ -101,6 +139,8 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
             flavor: string;
             totalValue: number;
             totalQuantity: number;
+            paidQuantity: number;
+            pendingQuantity: number;
             paymentMethod: string;
             paid: boolean;
             notes?: string;
@@ -117,8 +157,10 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                     flavor: bolo.flavor,
                     totalValue: 0,
                     totalQuantity: 0,
+                    paidQuantity: 0,
+                    pendingQuantity: 0,
                     paymentMethod: bolo.paymentMethod,
-                    paid: bolo.paid,
+                    paid: false,
                     notes: bolo.notes,
                     originalBolos: []
                 };
@@ -127,10 +169,18 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
             groups[key].totalQuantity += 1;
             groups[key].originalBolos.push(bolo);
 
-            // Se algum bolo estiver pago, considera o grupo como pago
+            // Conta bolos pagos e pendentes
             if (bolo.paid) {
-                groups[key].paid = true;
+                groups[key].paidQuantity += 1;
+            } else {
+                groups[key].pendingQuantity += 1;
             }
+        });
+
+        // Recalcula o status do grupo baseado nos bolos pendentes
+        Object.values(groups).forEach(group => {
+            // Se não há bolos pendentes, o grupo está totalmente pago
+            group.paid = group.pendingQuantity === 0;
         });
 
         return Object.values(groups).sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -152,6 +202,12 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                     </Typography>
                     <Typography variant="body2">
                         Total Pendente: {formatCurrency(list.filter(bolo => !bolo.paid).reduce((sum, bolo) => sum + bolo.value, 0))}
+                    </Typography>
+                    <Typography variant="body2">
+                        Grupos Completamente Pagos: {groupedBolos.filter(group => group.paid).length}
+                    </Typography>
+                    <Typography variant="body2">
+                        Grupos Parcialmente Pagos: {groupedBolos.filter(group => !group.paid && group.paidQuantity > 0).length}
                     </Typography>
                 </Box>
 
@@ -188,7 +244,7 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                                         <TableCell>{group.paymentMethod}</TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={getStatusText(group.paid)}
+                                                label={getStatusText(group.paid, group.paidQuantity, group.totalQuantity)}
                                                 color={getStatusColor(group.paid)}
                                                 size="small"
                                             />
@@ -222,8 +278,95 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                 <DialogContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
                         <Typography variant="body2" color="textSecondary">
-                            <strong>Bolo:</strong> {editDialog.bolo?.flavor} - {editDialog.bolo && formatCurrency(editDialog.bolo.value)}
+                            <strong>Sabor:</strong> {editDialog.bolo?.flavor}
                         </Typography>
+
+                        {/* Mostra informações do grupo */}
+                        {(() => {
+                            const groupKey = editDialog.bolo ? `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}` : '';
+                            const group = groupedBolos.find(g => g.key === groupKey);
+                            return group && group.totalQuantity > 1 ? (
+                                <>
+                                    <Typography variant="body2" color="info.main" sx={{ fontStyle: 'italic' }}>
+                                        Este grupo tem {group.totalQuantity} bolos. Escolha o que deseja editar:
+                                    </Typography>
+
+                                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                                        <Button
+                                            variant={editDialog.editMode === 'group' ? 'contained' : 'outlined'}
+                                            size="small"
+                                            onClick={() => setEditDialog(prev => ({ ...prev, editMode: 'group' }))}
+                                        >
+                                            Todo o grupo ({group.totalQuantity} bolos)
+                                        </Button>
+                                        <Button
+                                            variant={editDialog.editMode === 'individual' ? 'contained' : 'outlined'}
+                                            size="small"
+                                            onClick={() => setEditDialog(prev => ({ ...prev, editMode: 'individual' }))}
+                                        >
+                                            Bolo individual
+                                        </Button>
+                                    </Box>
+
+                                    {editDialog.editMode === 'group' && (
+                                        <Typography variant="body2" color="warning.main" sx={{ fontStyle: 'italic' }}>
+                                            ⚠️ Esta alteração será aplicada a todos os {group.totalQuantity} bolos deste grupo.
+                                        </Typography>
+                                    )}
+
+                                    {editDialog.editMode === 'individual' && (
+                                        <Typography variant="body2" color="info.main" sx={{ fontStyle: 'italic' }}>
+                                            ✅ Esta alteração será aplicada apenas ao bolo selecionado.
+                                        </Typography>
+                                    )}
+                                </>
+                            ) : null;
+                        })()}
+
+                        {editDialog.editMode === 'individual' && (
+                            <>
+                                <Typography variant="body2" color="info.main" sx={{ fontStyle: 'italic' }}>
+                                    ✅ Esta alteração será aplicada apenas ao bolo selecionado.
+                                </Typography>
+
+                                <FormControl fullWidth>
+                                    <InputLabel>Selecionar Bolo</InputLabel>
+                                    <Select
+                                        value={editDialog.selectedBoloId || ''}
+                                        label="Selecionar Bolo"
+                                        onChange={(e) => {
+                                            const selectedBolo = editDialog.bolo && (() => {
+                                                const groupKey = `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}`;
+                                                const group = groupedBolos.find(g => g.key === groupKey);
+                                                return group?.originalBolos.find(b => b.id === e.target.value);
+                                            })();
+
+                                            if (selectedBolo) {
+                                                setEditDialog(prev => ({
+                                                    ...prev,
+                                                    selectedBoloId: e.target.value as string,
+                                                    bolo: selectedBolo,
+                                                    paid: selectedBolo.paid,
+                                                    paymentMethod: Object.keys(paymentMethods).find(key =>
+                                                        paymentMethods[key as PaymentMethod] === selectedBolo.paymentMethod
+                                                    ) as PaymentMethod || 'cash'
+                                                }));
+                                            }
+                                        }}
+                                    >
+                                        {(() => {
+                                            const groupKey = editDialog.bolo ? `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}` : '';
+                                            const group = groupedBolos.find(g => g.key === groupKey);
+                                            return group?.originalBolos.map((bolo, index) => (
+                                                <MenuItem key={bolo.id} value={bolo.id}>
+                                                    Bolo {index + 1} - {bolo.paid ? 'Pago' : 'Pendente'} - {formatCurrency(bolo.value)}
+                                                </MenuItem>
+                                            )) || [];
+                                        })()}
+                                    </Select>
+                                </FormControl>
+                            </>
+                        )}
 
                         <FormControl fullWidth>
                             <InputLabel>Forma de Pagamento</InputLabel>

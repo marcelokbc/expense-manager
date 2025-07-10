@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     Table,
     TableBody,
@@ -93,6 +93,49 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
         setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash' });
     };
 
+    const groupedBolos = useMemo(() => {
+        const groups: { [key: string]: {
+            key: string;
+            date: Date;
+            clientName: string;
+            flavor: string;
+            totalValue: number;
+            totalQuantity: number;
+            paymentMethod: string;
+            paid: boolean;
+            notes?: string;
+            originalBolos: Bolo[];
+        }} = {};
+
+        list.forEach(bolo => {
+            const key = `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}`;
+            if (!groups[key]) {
+                groups[key] = {
+                    key,
+                    date: bolo.date,
+                    clientName: bolo.clientName,
+                    flavor: bolo.flavor,
+                    totalValue: 0,
+                    totalQuantity: 0,
+                    paymentMethod: bolo.paymentMethod,
+                    paid: bolo.paid,
+                    notes: bolo.notes,
+                    originalBolos: []
+                };
+            }
+            groups[key].totalValue += bolo.value;
+            groups[key].totalQuantity += 1;
+            groups[key].originalBolos.push(bolo);
+
+            // Se algum bolo estiver pago, considera o grupo como pago
+            if (bolo.paid) {
+                groups[key].paid = true;
+            }
+        });
+
+        return Object.values(groups).sort((a, b) => b.date.getTime() - a.date.getTime());
+    }, [list]);
+
     return (
         <>
             <Paper elevation={2} sx={{ padding: 3, marginBottom: 3 }}>
@@ -119,6 +162,7 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                                 <TableCell>Data</TableCell>
                                 <TableCell>Cliente</TableCell>
                                 <TableCell>Sabor</TableCell>
+                                <TableCell>Quantidade</TableCell>
                                 <TableCell>Valor</TableCell>
                                 <TableCell>Forma de Pagamento</TableCell>
                                 <TableCell>Status</TableCell>
@@ -127,34 +171,35 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {list.length === 0 ? (
+                            {groupedBolos.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} align="center">
+                                    <TableCell colSpan={9} align="center">
                                         Nenhum bolo registrado
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                list.map((bolo) => (
-                                    <TableRow key={bolo.id}>
-                                        <TableCell>{formatDate(bolo.date)}</TableCell>
-                                        <TableCell>{bolo.clientName}</TableCell>
-                                        <TableCell>{bolo.flavor}</TableCell>
-                                        <TableCell>{formatCurrency(bolo.value)}</TableCell>
-                                        <TableCell>{bolo.paymentMethod}</TableCell>
+                                groupedBolos.map((group) => (
+                                    <TableRow key={group.key}>
+                                        <TableCell>{formatDate(group.date)}</TableCell>
+                                        <TableCell>{group.clientName}</TableCell>
+                                        <TableCell>{group.flavor}</TableCell>
+                                        <TableCell>{group.totalQuantity}</TableCell>
+                                        <TableCell>{formatCurrency(group.totalValue)}</TableCell>
+                                        <TableCell>{group.paymentMethod}</TableCell>
                                         <TableCell>
                                             <Chip
-                                                label={getStatusText(bolo.paid)}
-                                                color={getStatusColor(bolo.paid)}
+                                                label={getStatusText(group.paid)}
+                                                color={getStatusColor(group.paid)}
                                                 size="small"
                                             />
                                         </TableCell>
                                         <TableCell>
-                                            {bolo.notes || '-'}
+                                            {group.notes || '-'}
                                         </TableCell>
                                         <TableCell>
                                             <Tooltip title="Editar pagamento">
                                                 <IconButton
-                                                    onClick={() => handleEditClick(bolo)}
+                                                    onClick={() => handleEditClick(group.originalBolos[0])}
                                                     color="primary"
                                                     size="small"
                                                 >

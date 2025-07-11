@@ -9,6 +9,8 @@ export const creditCards: CreditCard[] = [
   { name: 'Nubank Kbça', closingDay: 11, paymentDay: 18 },
   { name: 'Carrefour', closingDay: 5, paymentDay: 15 },
   { name: 'Assai', closingDay: 18, paymentDay: 25 },
+  { name: 'Itau', closingDay: 3, paymentDay: 10 },
+  { name: 'Magalu', closingDay: 19, paymentDay: 25 },
 ];
 
 export const getNextMonthCharge = (purchaseDate: Date, card: CreditCard) => {

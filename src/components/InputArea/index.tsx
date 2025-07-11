@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TextField, Box, IconButton, MenuItem, InputLabel, FormControl, Select, Paper, Typography, Tooltip } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add'; 
+import AddIcon from '@mui/icons-material/Add';
 import { Item } from '../../types/Item';
 import Swal from 'sweetalert2';
 
@@ -29,7 +29,7 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
         if (categories[a].title > categories[b].title) return 1;
         return 0;
     });
-    
+
     const handleAddEvent = () => {
         let errors: string[] = [];
 
@@ -61,10 +61,10 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
 
             if (selectedCreditCard) {
                 adjustedDate = getNextMonthCharge(new Date(dateField), selectedCreditCard);
-                
+
                 console.log("Original Date: ", dateField);
                 console.log("Adjusted Date: ", adjustedDate);
-                
+
                     Swal.fire({
                         icon: 'warning',
                         title: 'Atenção!',
@@ -157,6 +157,8 @@ export const InputArea = ({ onAdd, defaultDate }: Props) => {
                         <MenuItem value="Nubank Kbça">Nubank Kbça</MenuItem>
                         <MenuItem value="Carrefour">Carrefour </MenuItem>
                         <MenuItem value="Assai">Assai </MenuItem>
+                        <MenuItem value="Itau">Itau </MenuItem>
+                        <MenuItem value="Magalu">Magalu </MenuItem>
                         <MenuItem value="debito">Débito</MenuItem>
                         <MenuItem value="dinheiro">Dinheiro</MenuItem>
                         <MenuItem value="pix">Pix</MenuItem>

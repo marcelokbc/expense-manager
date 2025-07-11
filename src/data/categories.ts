@@ -15,6 +15,8 @@ export const categories: Category = {
     card1: { title: 'Cartão Carrefour', color: 'purple', expense: true },
     card2: { title: 'Cartão Nubank Kbça', color: 'purple', expense: true },
     card3: { title: 'Cartão Assaí', color: 'purple', expense: true },
+    card4: { title: 'Cartão Itau', color: 'purple', expense: true },
+    card5: { title: 'Cartão Magalu', color: 'purple', expense: true },
     healthplan: { title: 'Plano de Saúde', color: 'blue', expense: true },
     supplies: { title: 'Insumos Ju', color: 'blue', expense: true },
     laboratory: { title: 'Laboratório', color: 'blue', expense: true },

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
     Table,
     TableBody,
@@ -55,6 +55,9 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
     const [clientFilter, setClientFilter] = useState('');
     const [showOnlyPending, setShowOnlyPending] = useState(false);
 
+    useEffect(() => {
+    }, [list]);
+
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -106,20 +109,22 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                 // Edita apenas o bolo selecionado
                 const updatedBolo = {
                     ...editDialog.bolo,
+                    clientName: editDialog.bolo.clientName,
                     paid: editDialog.paid,
                     paymentMethod: paymentMethods[editDialog.paymentMethod]
                 };
                 onUpdateBolo(editDialog.selectedBoloId, updatedBolo);
             } else {
                 // Edita todo o grupo
-                const groupKey = `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}`;
-                const group = groupedBolos.find(g => g.key === groupKey);
+                const originalGroupKey = `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}`;
+                const group = groupedBolos.find(g => g.key === originalGroupKey);
 
-                if (group) {
-                    // Atualiza todos os bolos do grupo com o mesmo status e forma de pagamento
+                if (group && editDialog.bolo) {
+                    // Atualiza todos os bolos do grupo com o mesmo status, forma de pagamento e nome do cliente
                     group.originalBolos.forEach(bolo => {
                         const updatedBolo = {
                             ...bolo,
+                            clientName: editDialog.bolo!.clientName,
                             paid: editDialog.paid,
                             paymentMethod: paymentMethods[editDialog.paymentMethod]
                         };
@@ -346,6 +351,24 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                         <Typography variant="body2" color="textSecondary">
                             <strong>Sabor:</strong> {editDialog.bolo?.flavor}
                         </Typography>
+
+                        {/* Campo para editar nome do cliente */}
+                        <TextField
+                            fullWidth
+                            label="Nome do Cliente"
+                            value={editDialog.bolo?.clientName || ''}
+                            onChange={(e) => {
+                                if (editDialog.bolo) {
+                                    setEditDialog(prev => ({
+                                        ...prev,
+                                        bolo: {
+                                            ...prev.bolo!,
+                                            clientName: e.target.value
+                                        }
+                                    }));
+                                }
+                            }}
+                        />
 
                         {/* Mostra informações do grupo */}
                         {(() => {

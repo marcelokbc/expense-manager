@@ -22,12 +22,14 @@ import {
     Select,
     MenuItem,
     FormControlLabel,
-    Checkbox
+    Checkbox,
+    TextField
 } from '@mui/material';
 import { Edit as EditIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Bolo, PaymentMethod, paymentMethods } from '../../types/Bolo';
+import { Clear as ClearIcon } from '@mui/icons-material';
 
 type Props = {
     list: Bolo[];
@@ -49,6 +51,9 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
         paymentMethod: 'cash',
         editMode: 'group'
     });
+
+    const [clientFilter, setClientFilter] = useState('');
+    const [showOnlyPending, setShowOnlyPending] = useState(false);
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat('pt-BR', {
@@ -147,7 +152,14 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
             originalBolos: Bolo[];
         }} = {};
 
-        list.forEach(bolo => {
+        // Filtra a lista por nome do cliente se houver filtro
+        const filteredList = clientFilter.trim()
+            ? list.filter(bolo =>
+                bolo.clientName.toLowerCase().includes(clientFilter.toLowerCase())
+              )
+            : list;
+
+        filteredList.forEach(bolo => {
             const key = `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}`;
             if (!groups[key]) {
                 groups[key] = {
@@ -183,15 +195,69 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
             group.paid = group.pendingQuantity === 0;
         });
 
-        return Object.values(groups).sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [list]);
+        // Filtra grupos que têm pendências se showOnlyPending estiver ativo
+        let finalGroups = Object.values(groups);
+        if (showOnlyPending) {
+            finalGroups = finalGroups.filter(group => group.pendingQuantity > 0);
+        }
+
+        return finalGroups.sort((a, b) => b.date.getTime() - a.date.getTime());
+    }, [list, clientFilter, showOnlyPending]);
 
     return (
         <>
             <Paper elevation={2} sx={{ padding: 3, marginBottom: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                    Controle de Bolos
-                </Typography>
+                {/* Cabeçalho com título e campo de busca */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                    <Typography variant="h6">
+                        Controle de Bolos
+                    </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <TextField
+                            size="small"
+                            label="Buscar por cliente"
+                            placeholder="Digite o nome..."
+                            value={clientFilter}
+                            onChange={(e) => setClientFilter(e.target.value)}
+                            sx={{ minWidth: 250 }}
+                            InputProps={{
+                                endAdornment: clientFilter && (
+                                    <IconButton
+                                        size="small"
+                                        onClick={() => setClientFilter('')}
+                                        sx={{ mr: -0.5 }}
+                                    >
+                                        <ClearIcon />
+                                    </IconButton>
+                                )
+                            }}
+                        />
+
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={showOnlyPending}
+                                    onChange={(e) => setShowOnlyPending(e.target.checked)}
+                                    color="warning"
+                                    size="small"
+                                />
+                            }
+                            label="Apenas fiados"
+                        />
+                    </Box>
+                </Box>
+
+                {/* Informações de filtro */}
+                {(clientFilter || showOnlyPending) && (
+                    <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="textSecondary">
+                            {clientFilter && `Mostrando ${groupedBolos.length} resultado(s) para "${clientFilter}"`}
+                            {clientFilter && showOnlyPending && ' e '}
+                            {showOnlyPending && 'Filtrando apenas clientes com pendências'}
+                        </Typography>
+                    </Box>
+                )}
 
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <Typography variant="body2">

@@ -116,7 +116,9 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                 onUpdateBolo(editDialog.selectedBoloId, updatedBolo);
             } else {
                 // Edita todo o grupo
-                const originalGroupKey = `${editDialog.bolo.clientName}-${editDialog.bolo.flavor}-${editDialog.bolo.date.toISOString().slice(0, 10)}`;
+                // Usa o nome original do bolo para encontrar o grupo, não o nome editado
+                const originalBolo = list.find(b => b.id === editDialog.bolo!.id);
+                const originalGroupKey = originalBolo ? `${originalBolo.clientName}-${originalBolo.flavor}-${originalBolo.date.toISOString().slice(0, 10)}` : '';
                 const group = groupedBolos.find(g => g.key === originalGroupKey);
 
                 if (group && editDialog.bolo) {

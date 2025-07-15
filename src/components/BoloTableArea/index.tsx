@@ -23,9 +23,10 @@ import {
     MenuItem,
     FormControlLabel,
     Checkbox,
-    TextField
+    TextField,
+    Alert
 } from '@mui/material';
-import { Edit as EditIcon } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Bolo, PaymentMethod, paymentMethods } from '../../types/Bolo';
@@ -34,9 +35,10 @@ import { Clear as ClearIcon } from '@mui/icons-material';
 type Props = {
     list: Bolo[];
     onUpdateBolo?: (id: string, updatedBolo: Bolo) => void;
+    onDeleteBolo?: (id: string) => void;
 }
 
-export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
+export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
     const [editDialog, setEditDialog] = useState<{
         open: boolean;
         bolo: Bolo | null;
@@ -50,6 +52,16 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
         paid: false,
         paymentMethod: 'cash',
         editMode: 'group'
+    });
+
+    const [deleteDialog, setDeleteDialog] = useState<{
+        open: boolean;
+        bolo: Bolo | null;
+        deleteMode: 'group' | 'individual';
+    }>({
+        open: false,
+        bolo: null,
+        deleteMode: 'group'
     });
 
     const [clientFilter, setClientFilter] = useState('');
@@ -141,6 +153,44 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
 
     const handleCancelEdit = () => {
         setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group' });
+    };
+
+    const handleDeleteClick = (bolo: Bolo) => {
+        // Encontra o grupo do bolo
+        const groupKey = `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}`;
+        const group = groupedBolos.find(g => g.key === groupKey);
+
+        setDeleteDialog({
+            open: true,
+            bolo: bolo,
+            deleteMode: group && group.totalQuantity > 1 ? 'group' : 'individual'
+        });
+    };
+
+    const handleConfirmDelete = () => {
+        if (deleteDialog.bolo && onDeleteBolo) {
+            if (deleteDialog.deleteMode === 'individual') {
+                // Deleta apenas o bolo selecionado
+                onDeleteBolo(deleteDialog.bolo.id);
+            } else {
+                // Deleta todo o grupo
+                const groupKey = `${deleteDialog.bolo.clientName}-${deleteDialog.bolo.flavor}-${deleteDialog.bolo.date.toISOString().slice(0, 10)}`;
+                const group = groupedBolos.find(g => g.key === groupKey);
+
+                if (group) {
+                    // Deleta todos os bolos do grupo
+                    group.originalBolos.forEach(bolo => {
+                        onDeleteBolo(bolo.id);
+                    });
+                }
+            }
+
+            setDeleteDialog({ open: false, bolo: null, deleteMode: 'group' });
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setDeleteDialog({ open: false, bolo: null, deleteMode: 'group' });
     };
 
     const groupedBolos = useMemo(() => {
@@ -326,15 +376,26 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                                             {group.notes || '-'}
                                         </TableCell>
                                         <TableCell>
-                                            <Tooltip title="Editar pagamento">
-                                                <IconButton
-                                                    onClick={() => handleEditClick(group.originalBolos[0])}
-                                                    color="primary"
-                                                    size="small"
-                                                >
-                                                    <EditIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            <Box sx={{ display: 'flex', gap: 1 }}>
+                                                <Tooltip title="Editar pagamento">
+                                                    <IconButton
+                                                        onClick={() => handleEditClick(group.originalBolos[0])}
+                                                        color="primary"
+                                                        size="small"
+                                                    >
+                                                        <EditIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Excluir">
+                                                    <IconButton
+                                                        onClick={() => handleDeleteClick(group.originalBolos[0])}
+                                                        color="error"
+                                                        size="small"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Box>
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -497,6 +558,84 @@ export const BoloTableArea = ({ list, onUpdateBolo }: Props) => {
                     </Button>
                     <Button onClick={handleSaveEdit} variant="contained" color="primary">
                         Salvar
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Modal de Confirmação de Exclusão */}
+            <Dialog open={deleteDialog.open} onClose={handleCancelDelete} maxWidth="sm" fullWidth>
+                <DialogTitle>
+                    Confirmar Exclusão
+                </DialogTitle>
+                <DialogContent>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+                        <Alert severity="warning">
+                            Esta ação não pode ser desfeita!
+                        </Alert>
+
+                        <Typography variant="body1">
+                            <strong>Cliente:</strong> {deleteDialog.bolo?.clientName}
+                        </Typography>
+
+                        <Typography variant="body1">
+                            <strong>Sabor:</strong> {deleteDialog.bolo?.flavor}
+                        </Typography>
+
+                        <Typography variant="body1">
+                            <strong>Data:</strong> {deleteDialog.bolo && formatDate(deleteDialog.bolo.date)}
+                        </Typography>
+
+                        {/* Mostra informações do grupo */}
+                        {(() => {
+                            const groupKey = deleteDialog.bolo ? `${deleteDialog.bolo.clientName}-${deleteDialog.bolo.flavor}-${deleteDialog.bolo.date.toISOString().slice(0, 10)}` : '';
+                            const group = groupedBolos.find(g => g.key === groupKey);
+                            return group && group.totalQuantity > 1 ? (
+                                <>
+                                    <Typography variant="body2" color="info.main" sx={{ fontStyle: 'italic' }}>
+                                        Este grupo tem {group.totalQuantity} bolos. Escolha o que deseja excluir:
+                                    </Typography>
+
+                                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                                        <Button
+                                            variant={deleteDialog.deleteMode === 'group' ? 'contained' : 'outlined'}
+                                            size="small"
+                                            color="error"
+                                            onClick={() => setDeleteDialog(prev => ({ ...prev, deleteMode: 'group' }))}
+                                        >
+                                            Todo o grupo ({group.totalQuantity} bolos)
+                                        </Button>
+                                        <Button
+                                            variant={deleteDialog.deleteMode === 'individual' ? 'contained' : 'outlined'}
+                                            size="small"
+                                            color="error"
+                                            onClick={() => setDeleteDialog(prev => ({ ...prev, deleteMode: 'individual' }))}
+                                        >
+                                            Bolo individual
+                                        </Button>
+                                    </Box>
+
+                                    {deleteDialog.deleteMode === 'group' && (
+                                        <Typography variant="body2" color="error.main" sx={{ fontStyle: 'italic' }}>
+                                            ⚠️ Todos os {group.totalQuantity} bolos deste grupo serão excluídos.
+                                        </Typography>
+                                    )}
+
+                                    {deleteDialog.deleteMode === 'individual' && (
+                                        <Typography variant="body2" color="error.main" sx={{ fontStyle: 'italic' }}>
+                                            ⚠️ Apenas o bolo selecionado será excluído.
+                                        </Typography>
+                                    )}
+                                </>
+                            ) : null;
+                        })()}
+                    </Box>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCancelDelete}>
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleConfirmDelete} variant="contained" color="error">
+                        Excluir
                     </Button>
                 </DialogActions>
             </Dialog>

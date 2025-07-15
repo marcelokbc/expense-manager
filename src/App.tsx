@@ -139,6 +139,12 @@ const App = () => {
     );
   }
 
+  const handleDeleteBolo = (id: string) => {
+    setBolos(prevBolos =>
+      prevBolos.filter(bolo => bolo.id !== id)
+    );
+  }
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
   };
@@ -192,7 +198,7 @@ const App = () => {
 
               <BoloInputArea onAdd={handleAddBolo} defaultDate={defaultDate} />
 
-              <BoloTableArea list={filteredBolos} onUpdateBolo={handleUpdateBolo} />
+              <BoloTableArea list={filteredBolos} onUpdateBolo={handleUpdateBolo} onDeleteBolo={handleDeleteBolo} />
             </>
           )}
         </Paper>

@@ -54,7 +54,7 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
     });
 
     const [clientFilter, setClientFilter] = useState('');
-    const [showOnlyPending, setShowOnlyPending] = useState(false);
+    const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'paid' | 'pending'>('all');
 
     useEffect(() => {
         // Este useEffect garante que o agrupamento seja recalculado quando a lista muda
@@ -244,22 +244,24 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
 
         // Filtra grupos que têm pendências se showOnlyPending estiver ativo
         let finalGroups = Object.values(groups);
-        if (showOnlyPending) {
+        if (paymentStatusFilter === 'pending') {
             finalGroups = finalGroups.filter(group => group.pendingQuantity > 0);
+        } else if (paymentStatusFilter === 'paid') {
+            finalGroups = finalGroups.filter(group => group.paid);
         }
 
         return finalGroups.sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [list, clientFilter, showOnlyPending]);
+    }, [list, clientFilter, paymentStatusFilter]);
 
     return (
         <>
             <Paper elevation={2} sx={{ padding: 3, marginBottom: 3 }}>
                 <BoloFilters
                     clientFilter={clientFilter}
-                    showOnlyPending={showOnlyPending}
+                    paymentStatusFilter={paymentStatusFilter}
                     groupedBolos={groupedBolos}
                     onClientFilterChange={setClientFilter}
-                    onShowOnlyPendingChange={setShowOnlyPending}
+                    onPaymentStatusFilterChange={setPaymentStatusFilter}
                 />
 
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>

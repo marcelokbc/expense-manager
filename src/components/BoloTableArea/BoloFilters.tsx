@@ -2,27 +2,29 @@ import React from 'react';
 import {
     Box,
     TextField,
-    FormControlLabel,
-    Checkbox,
     Typography,
-    IconButton
+    IconButton,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel
 } from '@mui/material';
 import { Clear as ClearIcon } from '@mui/icons-material';
 
 type BoloFiltersProps = {
     clientFilter: string;
-    showOnlyPending: boolean;
+    paymentStatusFilter: 'all' | 'paid' | 'pending';
     groupedBolos: any[];
     onClientFilterChange: (value: string) => void;
-    onShowOnlyPendingChange: (value: boolean) => void;
+    onPaymentStatusFilterChange: (value: 'all' | 'paid' | 'pending') => void;
 };
 
 export const BoloFilters = ({
     clientFilter,
-    showOnlyPending,
+    paymentStatusFilter,
     groupedBolos,
     onClientFilterChange,
-    onShowOnlyPendingChange
+    onPaymentStatusFilterChange
 }: BoloFiltersProps) => {
     return (
         <>
@@ -53,27 +55,29 @@ export const BoloFilters = ({
                         }}
                     />
 
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={showOnlyPending}
-                                onChange={(e) => onShowOnlyPendingChange(e.target.checked)}
-                                color="warning"
-                                size="small"
-                            />
-                        }
-                        label="Apenas fiados"
-                    />
+                    <FormControl size="small" sx={{ minWidth: 150 }}>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={paymentStatusFilter}
+                            label="Status"
+                            onChange={e => onPaymentStatusFilterChange(e.target.value as 'all' | 'paid' | 'pending')}
+                        >
+                            <MenuItem value="all">Todos</MenuItem>
+                            <MenuItem value="paid">Apenas pagos</MenuItem>
+                            <MenuItem value="pending">Apenas fiados</MenuItem>
+                        </Select>
+                    </FormControl>
                 </Box>
             </Box>
 
             {/* Informações de filtro */}
-            {(clientFilter || showOnlyPending) && (
+            {(clientFilter || paymentStatusFilter !== 'all') && (
                 <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" color="textSecondary">
                         {clientFilter && `Mostrando ${groupedBolos.length} resultado(s) para "${clientFilter}"`}
-                        {clientFilter && showOnlyPending && ' e '}
-                        {showOnlyPending && 'Filtrando apenas clientes com pendências'}
+                        {clientFilter && paymentStatusFilter !== 'all' && ' e '}
+                        {paymentStatusFilter === 'pending' && 'Filtrando apenas clientes com pendências'}
+                        {paymentStatusFilter === 'paid' && 'Filtrando apenas clientes pagos'}
                     </Typography>
                 </Box>
             )}

@@ -35,12 +35,14 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
         paymentMethod: PaymentMethod;
         editMode: 'group' | 'individual';
         selectedBoloId?: string;
+        editedDate: string;
     }>({
         open: false,
         bolo: null,
         paid: false,
         paymentMethod: 'cash',
-        editMode: 'group'
+        editMode: 'group',
+        editedDate: ''
     });
 
     const [deleteDialog, setDeleteDialog] = useState<{
@@ -101,21 +103,32 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
                 paymentMethods[key as PaymentMethod] === initialBolo.paymentMethod
             ) as PaymentMethod || 'cash',
             editMode: group && group.originalBolos.length > 1 ? 'group' : 'individual',
-            selectedBoloId: initialBolo.id
+            selectedBoloId: initialBolo.id,
+            editedDate: initialBolo.date.toISOString().slice(0, 10)
         });
     };
 
     const handleSaveEdit = () => {
         if (editDialog.bolo && onUpdateBolo) {
+            // Função para criar data corretamente sem problemas de fuso horário
+            const createLocalDate = (dateString: string) => {
+                const [year, month, day] = dateString.split('-').map(Number);
+                return new Date(year, month - 1, day); // month - 1 porque Date usa 0-11 para meses
+            };
+
             if (editDialog.editMode === 'individual' && editDialog.selectedBoloId) {
                 // Edita apenas o bolo selecionado
-                const updatedBolo = {
-                    ...editDialog.bolo,
-                    clientName: editDialog.bolo.clientName,
-                    paid: editDialog.paid,
-                    paymentMethod: paymentMethods[editDialog.paymentMethod]
-                };
-                onUpdateBolo(editDialog.selectedBoloId, updatedBolo);
+                const selectedBolo = list.find(b => b.id === editDialog.selectedBoloId);
+                if (selectedBolo) {
+                    const updatedBolo = {
+                        ...selectedBolo,
+                        clientName: editDialog.bolo.clientName,
+                        paid: editDialog.paid,
+                        paymentMethod: paymentMethods[editDialog.paymentMethod],
+                        date: createLocalDate(editDialog.editedDate)
+                    };
+                    onUpdateBolo(editDialog.selectedBoloId, updatedBolo);
+                }
             } else {
                 // Edita todo o grupo
                 // Usa o nome original do bolo para encontrar o grupo, não o nome editado
@@ -124,25 +137,26 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
                 const group = groupedBolos.find(g => g.key === originalGroupKey);
 
                 if (group && editDialog.bolo) {
-                    // Atualiza todos os bolos do grupo com o mesmo status, forma de pagamento e nome do cliente
+                    // Atualiza todos os bolos do grupo com o mesmo status, forma de pagamento, nome do cliente e data
                     group.originalBolos.forEach(bolo => {
                         const updatedBolo = {
                             ...bolo,
                             clientName: editDialog.bolo!.clientName,
                             paid: editDialog.paid,
-                            paymentMethod: paymentMethods[editDialog.paymentMethod]
+                            paymentMethod: paymentMethods[editDialog.paymentMethod],
+                            date: createLocalDate(editDialog.editedDate)
                         };
                         onUpdateBolo(bolo.id, updatedBolo);
                     });
                 }
             }
 
-            setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group' });
+            setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group', editedDate: '' });
         }
     };
 
     const handleCancelEdit = () => {
-        setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group' });
+        setEditDialog({ open: false, bolo: null, paid: false, paymentMethod: 'cash', editMode: 'group', editedDate: '' });
     };
 
     const handleDeleteClick = (bolo: Bolo) => {
@@ -370,7 +384,22 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
                     bolo: prev.bolo ? { ...prev.bolo, clientName: name } : null
                 }))}
                 onEditModeChange={(mode) => setEditDialog(prev => ({ ...prev, editMode: mode }))}
-                onSelectedBoloChange={(boloId) => setEditDialog(prev => ({ ...prev, selectedBoloId: boloId }))}
+                onSelectedBoloChange={(boloId) => {
+                    const selectedBolo = list.find(b => b.id === boloId);
+                    if (selectedBolo) {
+                        setEditDialog(prev => ({
+                            ...prev,
+                            selectedBoloId: boloId,
+                            bolo: selectedBolo,
+                            paid: selectedBolo.paid,
+                            paymentMethod: Object.keys(paymentMethods).find(key =>
+                                paymentMethods[key as PaymentMethod] === selectedBolo.paymentMethod
+                            ) as PaymentMethod || 'cash',
+                            editedDate: selectedBolo.date.toISOString().slice(0, 10)
+                        }));
+                    }
+                }}
+                onDateChange={(date) => setEditDialog(prev => ({ ...prev, editedDate: date }))}
                 formatCurrency={formatCurrency}
             />
 

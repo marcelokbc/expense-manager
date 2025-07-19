@@ -30,6 +30,7 @@ type EditBoloModalProps = {
     onPaidChange: (paid: boolean) => void;
     onPaymentMethodChange: (method: PaymentMethod) => void;
     onClientNameChange: (name: string) => void;
+    onDateChange: (date: string) => void;
     onEditModeChange: (mode: 'group' | 'individual') => void;
     onSelectedBoloChange: (boloId: string) => void;
     formatCurrency: (value: number) => string;
@@ -48,12 +49,18 @@ export const EditBoloModal = ({
     onPaidChange,
     onPaymentMethodChange,
     onClientNameChange,
+    onDateChange,
     onEditModeChange,
     onSelectedBoloChange,
     formatCurrency
 }: EditBoloModalProps) => {
     const groupKey = bolo ? `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}` : '';
     const group = groupedBolos.find(g => g.key === groupKey);
+
+    // Formata a data para o input type="date" (YYYY-MM-DD)
+    const formatDateForInput = (date: Date) => {
+        return date.toISOString().slice(0, 10);
+    };
 
     return (
         <Dialog open={open} onClose={onCancel} maxWidth="sm" fullWidth>
@@ -72,6 +79,18 @@ export const EditBoloModal = ({
                         label="Nome do Cliente"
                         value={bolo?.clientName || ''}
                         onChange={(e) => onClientNameChange(e.target.value)}
+                    />
+
+                    {/* Campo para editar data */}
+                    <TextField
+                        fullWidth
+                        label="Data"
+                        type="date"
+                        value={bolo ? formatDateForInput(bolo.date) : ''}
+                        onChange={(e) => onDateChange(e.target.value)}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
                     />
 
                     {/* Mostra informações do grupo */}

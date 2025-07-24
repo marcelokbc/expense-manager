@@ -14,5 +14,7 @@ export const flavors = [
     'Morango',
     'Ninho com morango',
     'Alpino',
+    'Mousse de maracujá',
+    'Mousse de limão',
     'Outros'
 ];

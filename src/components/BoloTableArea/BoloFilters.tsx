@@ -7,7 +7,9 @@ import {
     Select,
     MenuItem,
     FormControl,
-    InputLabel
+    InputLabel,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
 import { Clear as ClearIcon } from '@mui/icons-material';
 
@@ -17,6 +19,8 @@ type BoloFiltersProps = {
     groupedBolos: any[];
     onClientFilterChange: (value: string) => void;
     onPaymentStatusFilterChange: (value: 'all' | 'paid' | 'pending') => void;
+    onSearchAllMonthsChange?: (value: boolean) => void;
+    searchAllMonths?: boolean;
 };
 
 export const BoloFilters = ({
@@ -24,7 +28,9 @@ export const BoloFilters = ({
     paymentStatusFilter,
     groupedBolos,
     onClientFilterChange,
-    onPaymentStatusFilterChange
+    onPaymentStatusFilterChange,
+    onSearchAllMonthsChange,
+    searchAllMonths = false
 }: BoloFiltersProps) => {
     return (
         <>
@@ -54,6 +60,20 @@ export const BoloFilters = ({
                             )
                         }}
                     />
+
+                    {clientFilter.trim() && onSearchAllMonthsChange && (
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={searchAllMonths}
+                                    onChange={(e) => onSearchAllMonthsChange(e.target.checked)}
+                                    size="small"
+                                />
+                            }
+                            label="Buscar em todos os meses"
+                            sx={{ ml: 1 }}
+                        />
+                    )}
 
                     <FormControl size="small" sx={{ minWidth: 150 }}>
                         <InputLabel>Status</InputLabel>

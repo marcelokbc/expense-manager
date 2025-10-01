@@ -23,11 +23,12 @@ import { BoloFilters } from './BoloFilters';
 
 type Props = {
     list: Bolo[];
+    allBolos?: Bolo[]; // Lista completa de bolos para busca em todos os meses
     onUpdateBolo?: (id: string, updatedBolo: Bolo) => void;
     onDeleteBolo?: (id: string) => void;
 }
 
-export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
+export const BoloTableArea = ({ list, allBolos, onUpdateBolo, onDeleteBolo }: Props) => {
     const [editDialog, setEditDialog] = useState<{
         open: boolean;
         bolo: Bolo | null;
@@ -57,6 +58,7 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
 
     const [clientFilter, setClientFilter] = useState('');
     const [paymentStatusFilter, setPaymentStatusFilter] = useState<'all' | 'paid' | 'pending'>('all');
+    const [searchAllMonths, setSearchAllMonths] = useState(false);
 
     useEffect(() => {
         // Este useEffect garante que o agrupamento seja recalculado quando a lista muda
@@ -213,12 +215,15 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
             originalBolos: Bolo[];
         }} = {};
 
+        // Usa a lista completa se searchAllMonths estiver ativo e houver filtro de cliente
+        const sourceList = (searchAllMonths && clientFilter.trim() && allBolos) ? allBolos : list;
+
         // Filtra a lista por nome do cliente se houver filtro
         const filteredList = clientFilter.trim()
-            ? list.filter(bolo =>
+            ? sourceList.filter(bolo =>
                 bolo.clientName.toLowerCase().includes(clientFilter.toLowerCase())
               )
-            : list;
+            : sourceList;
 
         filteredList.forEach(bolo => {
             const key = `${bolo.clientName}-${bolo.flavor}-${bolo.date.toISOString().slice(0, 10)}`;
@@ -265,7 +270,7 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
         }
 
         return finalGroups.sort((a, b) => b.date.getTime() - a.date.getTime());
-    }, [list, clientFilter, paymentStatusFilter]);
+    }, [list, allBolos, clientFilter, paymentStatusFilter, searchAllMonths]);
 
     return (
         <>
@@ -276,17 +281,19 @@ export const BoloTableArea = ({ list, onUpdateBolo, onDeleteBolo }: Props) => {
                     groupedBolos={groupedBolos}
                     onClientFilterChange={setClientFilter}
                     onPaymentStatusFilterChange={setPaymentStatusFilter}
+                    onSearchAllMonthsChange={setSearchAllMonths}
+                    searchAllMonths={searchAllMonths}
                 />
 
                 <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
                     <Typography variant="body2">
-                        Total de Bolos: {list.length}
+                        Total de Bolos: {groupedBolos.reduce((sum, group) => sum + group.totalQuantity, 0)}
                     </Typography>
                     <Typography variant="body2">
-                        Total Pago: {formatCurrency(list.filter(bolo => bolo.paid).reduce((sum, bolo) => sum + bolo.value, 0))}
+                        Total Pago: {formatCurrency(groupedBolos.reduce((sum, group) => sum + group.totalValue * (group.paidQuantity / group.totalQuantity), 0))}
                     </Typography>
                     <Typography variant="body2">
-                        Total Pendente: {formatCurrency(list.filter(bolo => !bolo.paid).reduce((sum, bolo) => sum + bolo.value, 0))}
+                        Total Pendente: {formatCurrency(groupedBolos.reduce((sum, group) => sum + group.totalValue * (group.pendingQuantity / group.totalQuantity), 0))}
                     </Typography>
                     <Typography variant="body2">
                         Grupos Completamente Pagos: {groupedBolos.filter(group => group.paid).length}

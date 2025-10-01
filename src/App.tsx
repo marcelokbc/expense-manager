@@ -198,7 +198,7 @@ const App = () => {
 
               <BoloInputArea onAdd={handleAddBolo} defaultDate={defaultDate} />
 
-              <BoloTableArea list={filteredBolos} onUpdateBolo={handleUpdateBolo} onDeleteBolo={handleDeleteBolo} />
+              <BoloTableArea list={filteredBolos} allBolos={bolos} onUpdateBolo={handleUpdateBolo} onDeleteBolo={handleDeleteBolo} />
             </>
           )}
         </Paper>

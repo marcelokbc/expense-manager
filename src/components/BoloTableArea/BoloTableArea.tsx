@@ -120,7 +120,9 @@ export const BoloTableArea = ({ list, allBolos, onUpdateBolo, onDeleteBolo }: Pr
 
             if (editDialog.editMode === 'individual' && editDialog.selectedBoloId) {
                 // Edita apenas o bolo selecionado
-                const selectedBolo = list.find(b => b.id === editDialog.selectedBoloId);
+                // Procura o bolo na lista correta (pode estar em allBolos se searchAllMonths estiver ativo)
+                const searchList = (searchAllMonths && allBolos) ? allBolos : list;
+                const selectedBolo = searchList.find(b => b.id === editDialog.selectedBoloId);
                 if (selectedBolo) {
                     const updatedBolo = {
                         ...selectedBolo,
@@ -134,7 +136,9 @@ export const BoloTableArea = ({ list, allBolos, onUpdateBolo, onDeleteBolo }: Pr
             } else {
                 // Edita todo o grupo
                 // Usa o nome original do bolo para encontrar o grupo, não o nome editado
-                const originalBolo = list.find(b => b.id === editDialog.bolo!.id);
+                // Procura o bolo na lista correta (pode estar em allBolos se searchAllMonths estiver ativo)
+                const searchList = (searchAllMonths && allBolos) ? allBolos : list;
+                const originalBolo = searchList.find(b => b.id === editDialog.bolo!.id);
                 const originalGroupKey = originalBolo ? `${originalBolo.clientName}-${originalBolo.flavor}-${originalBolo.date.toISOString().slice(0, 10)}` : '';
                 const group = groupedBolos.find(g => g.key === originalGroupKey);
 
@@ -392,7 +396,9 @@ export const BoloTableArea = ({ list, allBolos, onUpdateBolo, onDeleteBolo }: Pr
                 }))}
                 onEditModeChange={(mode) => setEditDialog(prev => ({ ...prev, editMode: mode }))}
                 onSelectedBoloChange={(boloId) => {
-                    const selectedBolo = list.find(b => b.id === boloId);
+                    // Procura o bolo na lista correta (pode estar em allBolos se searchAllMonths estiver ativo)
+                    const searchList = (searchAllMonths && allBolos) ? allBolos : list;
+                    const selectedBolo = searchList.find(b => b.id === boloId);
                     if (selectedBolo) {
                         setEditDialog(prev => ({
                             ...prev,

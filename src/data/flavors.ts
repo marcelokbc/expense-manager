@@ -18,5 +18,7 @@ export const flavors = [
     'Mousse de limão',
     'Mouse de chocolate',
     'Bolo Bombom',
+    'Torta de limão trufado',
+    'Torta de chocolate trufado',
     'Outros'
 ];
